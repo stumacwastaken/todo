@@ -1,0 +1,10 @@
+FROM migrate/migrate
+
+COPY ./migrations ./migrations
+COPY run.sh run.sh
+ENV HOST="db:3306"
+ENV DB="todo"
+ENV USER="root"
+ENV PASSWORD="password"
+
+ENTRYPOINT [ "./run.sh" ]
