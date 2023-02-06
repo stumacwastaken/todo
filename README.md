@@ -29,13 +29,21 @@ The client then makes client side requests to the todos service, which in turn i
 For more details on the todos service, [see its readme](services/todo/README.md). For the UI, see the [UI readme](ui/README.md)
 
 
-## Metrics and Tracing
-<<Todo>>
+## Tracing
+A basic tracing configuration is set up with a Jaeger backend. It covers the basics of time spent tracing, etc. However it is not taking
+advantage of any additional metrics that could be tracked, and is not tracking anything in the frontend (nextjs server would be a prime candidate for a phase two).
+Additionally, I haven't included any unit tests at this time.
+
+to see the tracer in action head to http://localhost:16686/ when docker compose is running (and assuming you've made a few requests in the UI, or with postman)
 
 ## Improvements and Caveats
 
 ### Tests
-Testing is reasonably solid on the todos service. However, I admit that I'm pretty new with react, and nextjs. I didn't manage to get any testing done. The UI, thankfully, is reasonably simple and can be manually tested quickly enough. In production it'd be better to have automated testing before deploying. 
+Testing is reasonably solid on the todos service. However, I admit that I'm pretty new with react, and nextjs. I didn't manage to get any testing done. The UI, thankfully, is reasonably simple and can be manually tested quickly enough. In production it'd be better to have automated testing before deploying. Also, the tracing code in the todo service could be testable as well.
+
+## Refactoring Tracing
+The tracing code in the todo service was created as a last minute addition. In practice, a package like this could most definitely be refactored out into its own generic package, that would then be
+usable as a library across any additional services that are written in golang. 
 
 ### Service Startup
 as mentioned earlier, using docker compose works well enough for a demo. However I'd rather see a small kubernetes cluster running our services. With it, I could have hidden everything behind an ingress controller (potentially saving CORS issues), and possibly included a users service that could authenticate. This is something I may look at later to demonstrate a more service based architecture that can scale out. 
