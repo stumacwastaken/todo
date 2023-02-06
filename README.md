@@ -38,10 +38,18 @@ to see the tracer in action head to http://localhost:16686/ when docker compose 
 
 ## Improvements and Caveats
 
+
+### Additional todo APIs
+I didn't implement the delete or single document GET API endpoints, as I didn't end up having a use case for them in this instance. The deletes
+are soft deletes, and were solved with a PATCH request. In production this definitely shouldn't be a thing as it can mess with tracing, and 
+is generally less-than-ideal practice from a personal pride point of vew.
+The single GET (i.e: `api/todo/some-id-here`) is currently stubbed. In the future I can see a use case where a single todo can be accessed
+to include more data, with a status, more in depth description, priority, etc. Similar to how Notion, Monday, or even Trello/Jira works. 
+
 ### Tests
 Testing is reasonably solid on the todos service. However, I admit that I'm pretty new with react, and nextjs. I didn't manage to get any testing done. The UI, thankfully, is reasonably simple and can be manually tested quickly enough. In production it'd be better to have automated testing before deploying. Also, the tracing code in the todo service could be testable as well.
 
-## Refactoring Tracing
+### Refactoring Tracing
 The tracing code in the todo service was created as a last minute addition. In practice, a package like this could most definitely be refactored out into its own generic package, that would then be
 usable as a library across any additional services that are written in golang. 
 
