@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,7 +23,7 @@ func TestNewServerStartupAndShutdown(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rr := httptest.NewRecorder()
-	go srv.Start()
+	go srv.Start(context.Background())
 	time.Sleep(10 * time.Millisecond)
 	res, err := http.Get("http://localhost:10901/")
 	assert.Nil(t, err)
@@ -33,5 +34,4 @@ func TestNewServerStartupAndShutdown(t *testing.T) {
 	go srv.Stop()
 	res, err = http.Get("localhost:10901/")
 	assert.Error(t, err)
-	// assert.Equal(t, 200, res.StatusCode, "server should be running")
 }

@@ -1,27 +1,17 @@
 package rest
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/stumacwastaken/todo/log"
 	"github.com/stumacwastaken/todo/rest"
 	"github.com/stumacwastaken/todo/stores/database"
 	"github.com/stumacwastaken/todo/stores/tododb"
 	"github.com/stumacwastaken/todo/todoitem"
+	"github.com/stumacwastaken/todo/tracing"
 	"go.uber.org/zap"
 )
-
-// import (
-// 	"context"
-// 	"io"
-// 	"os"
-// 	"os/signal"
-// 	"syscall"
-// )
-
-// func Run(out, stderr io.Writer) error {
-// 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGPIPE)
-// 	defer cancel()
-// }
 
 var (
 	Cmd = &cobra.Command{
@@ -71,8 +61,12 @@ func server(cmd *cobra.Command, args []string) {
 	//basically, be ready to refactor and rip out
 	tdh.RegisterTodoEndpoints(srv.Router, "/api")
 
-	//create the signal stuff....
-	err = srv.Start()
+	//register tracing
+	tp := tracing.InitTracingProvider("todo")
+	ctx := context.Background()
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	err = srv.Start(ctx)
 	if err != nil {
 		log.Default().Error("error starting restful server. Shutting down", zap.Error(err))
 	}

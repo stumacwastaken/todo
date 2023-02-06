@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	terr "github.com/stumacwastaken/todo/errors"
 	"github.com/stumacwastaken/todo/todoitem"
+	"github.com/stumacwastaken/todo/tracing"
 )
 
 type TodoHandlers struct {
@@ -35,7 +36,9 @@ func (h *TodoHandlers) RegisterTodoEndpoints(parent *chi.Mux, prefix string) {
 }
 
 func (h *TodoHandlers) GetTodos(w http.ResponseWriter, r *http.Request) {
-	todos, err := h.TodoItem.GetAll(r.Context())
+	ctx, span := tracing.Tracer().Start(r.Context(), "GetAll")
+	defer span.End()
+	todos, err := h.TodoItem.GetAll(ctx)
 	if err != nil {
 		if v, ok := err.(*terr.TodoError); ok {
 			w.WriteHeader(v.HttpCode)
@@ -65,6 +68,8 @@ func (h *TodoHandlers) GetTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TodoHandlers) CreateTodo(w http.ResponseWriter, r *http.Request) {
+	ctx, span := tracing.Tracer().Start(r.Context(), "CreateTodo")
+	defer span.End()
 	r.Body = http.MaxBytesReader(w, r.Body, 1048576)
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
@@ -74,7 +79,7 @@ func (h *TodoHandlers) CreateTodo(w http.ResponseWriter, r *http.Request) {
 		figureDecodeError(err, w, r)
 		return
 	}
-	createdItem, err := h.TodoItem.Create(r.Context(), i)
+	createdItem, err := h.TodoItem.Create(ctx, i)
 	if err != nil {
 		if v, ok := err.(*terr.TodoError); ok {
 			w.WriteHeader(v.HttpCode)
@@ -99,6 +104,8 @@ func (h *TodoHandlers) CreateTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TodoHandlers) UpdateTodo(w http.ResponseWriter, r *http.Request) {
+	ctx, span := tracing.Tracer().Start(r.Context(), "Update")
+	defer span.End()
 	id := chi.URLParam(r, "id")
 	r.Body = http.MaxBytesReader(w, r.Body, 1048576)
 	dec := json.NewDecoder(r.Body)
@@ -109,7 +116,7 @@ func (h *TodoHandlers) UpdateTodo(w http.ResponseWriter, r *http.Request) {
 		figureDecodeError(err, w, r)
 		return
 	}
-	updatedItem, err := h.TodoItem.Update(r.Context(), i, id)
+	updatedItem, err := h.TodoItem.Update(ctx, i, id)
 	if err != nil {
 		if v, ok := err.(*terr.TodoError); ok {
 			w.WriteHeader(v.HttpCode)

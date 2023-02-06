@@ -24,6 +24,14 @@ services:
       # Where our data will be persisted
     volumes:
       - my-db:/var/lib/mysql
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - LOG_LEVEL=debug
   server:
     build:
       dockerfile: Dockerfile
@@ -37,6 +45,8 @@ services:
       db:
          condition: service_healthy
     command:  ["--dbhost", "db:3306", "--dbuser", "root", "--dbpass", "password", "--port", "9000"]
+    environment:
+      - OTEL_EXPORTER_JAEGER_ENDPOINT="http://jaeger:14268/api/traces"
   ui:
     build:
       dockerfile: Dockerfile

@@ -10,7 +10,8 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/todo.go",
-            "args": ["server", "--dbhost", "localhost:3306", "--dbuser", "root", "--dbpass", "password", "--port", "8999"]
+            "args": ["server", "--dbhost", "localhost:3306", "--dbuser", "root", "--dbpass", "password", "--port", "8999"],
+            "env": {"OTEL_EXPORTER_JAEGER_ENDPOINT":"http://localhost:14268/api/traces" }
         },
         {
             "name": "Seed database",

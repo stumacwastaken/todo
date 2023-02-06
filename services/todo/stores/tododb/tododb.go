@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/stumacwastaken/todo/log"
+	"github.com/stumacwastaken/todo/tracing"
 	"go.uber.org/zap"
 
 	"github.com/jmoiron/sqlx"
@@ -24,6 +25,8 @@ func NewStore(db *sqlx.DB) *Store {
 }
 
 func (s *Store) Create(ctx context.Context, item todoitem.TodoItem) (todoitem.TodoItem, error) {
+	ctx, span := tracing.Tracer().Start(ctx, "store-create")
+	defer span.End()
 	statement := `INSERT into todo_item (summary) VALUES (?)`
 	tx, err := s.db.Beginx()
 	if err != nil {
@@ -66,6 +69,8 @@ func (s *Store) Create(ctx context.Context, item todoitem.TodoItem) (todoitem.To
 }
 
 func (s *Store) Update(ctx context.Context, item todoitem.TodoItem) (todoitem.TodoItem, error) {
+	ctx, span := tracing.Tracer().Start(ctx, "store-update")
+	defer span.End()
 	statement := `UPDATE todo_item SET summary = ?, date_updated = ?, deleted = ?, completed = ? WHERE id = ?`
 	tx, err := s.db.Beginx()
 	if err != nil {
@@ -91,6 +96,8 @@ func (s *Store) Update(ctx context.Context, item todoitem.TodoItem) (todoitem.To
 }
 
 func (s *Store) GetById(ctx context.Context, id string) (todoitem.TodoItem, error) {
+	ctx, span := tracing.Tracer().Start(ctx, "store-getById")
+	defer span.End()
 	statement := "SELECT * FROM todo_item where id=?"
 	row := s.db.QueryRowx(statement, id)
 	v := new(dbTodoItem)
@@ -109,6 +116,8 @@ func (s *Store) GetById(ctx context.Context, id string) (todoitem.TodoItem, erro
 
 //could be improved to return additional metadata and better query filtering
 func (s *Store) GetAll(ctx context.Context) ([]todoitem.TodoItem, error) {
+	ctx, span := tracing.Tracer().Start(ctx, "store-getall")
+	defer span.End()
 	q := fmt.Sprintf(`SELECT * FROM todo_item WHERE deleted=false ORDER BY date_created DESC`) //keep fmt here for now....cause queries and filters
 	tx, err := s.db.Beginx()
 	if err != nil {
