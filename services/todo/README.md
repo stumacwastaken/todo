@@ -4,13 +4,19 @@ The todo service is effectively the middleware service that acts as the glue bet
 a RESTful api for your basic CRUD operations.
 
 ## Database
-After there's a running Mysql isntance (via docker compose is an easy solution). Make sure you've connected to it and have created the todo database. See [the create_database sql script](_infra/db/create_database.sql) for a dead simple command. 
+After there's a running Mysql instance (via docker compose is an easy solution). Make sure you've connected to it and have created the todo database. See [the create_database sql script](_infra/db/create_database.sql) for a dead simple command. 
 
 Schemas are located in db/migrations using the tool [go-migrate](https://github.com/golang-migrate/migrate). This tool generates the files for migrations,
 and you as the developer implement your changes in plain old SQL. An example to create a migration is like this:
 ` migrate create -dir db/migrations -ext sql create_todo_table  `
 
-These migrations are run in a docker container before the service is launched. I know some people like to integrate their migrations into the
+To run the docker container migration, run:
+`docker build -f Dockerfile.migrate -t todo/migrate:latest .`
+`docker run -it --rm  --network todo_default todo/migrate`
+
+from the [db folder](_infra/db)
+
+These migrations can be run in a docker container before the service is launched. I know some people like to integrate their migrations into the
 main service on startup. But that's always irked me as it too heavily couples service startup to the database. It's a nice check to be sure,
 but I've had enough ops people get annoyed at this as they may want to validate various scenarios before attempting such a thing.
 See Dockerfile.migrate [migration dockerfile](_infra/db/Dockerfile.migrate) for how these migrations are run. but it basically boils down to

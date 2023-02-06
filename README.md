@@ -13,6 +13,7 @@ your todo item.
 
 With docker running, it's pretty straight forward to get started.
 1. Run `docker-compose up` in this directory
+2. Run `docker run -it --network todo_default --rm mysql mysql -h db -uroot -ppassword` and then `CREATE DATABASE IF NOT EXISTS todo;`
 2. See the [Readme](services/todo/README.md) for how to get the databse migrations<sup>1</sup> and seeding done.
 3. After migrations have completed, you may or may not need to restart docker-compose. 
 4. head on over to http://localhost:3000. It should direct you to the UI with some pre-filled items.
